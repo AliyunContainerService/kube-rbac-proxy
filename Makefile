@@ -1,13 +1,16 @@
 all: check-license build generate test
 
+VERSION?=v0.4.1
+GIT_COMMIT:=$(shell git rev-parse --short HEAD)
+
+
 GITHUB_URL=github.com/brancz/kube-rbac-proxy
 GOOS?=$(shell uname -s | tr A-Z a-z)
 GOARCH?=$(subst x86_64,amd64,$(patsubst i%86,386,$(shell uname -m)))
 OUT_DIR=_output
 BIN?=kube-rbac-proxy
-VERSION?=$(shell cat VERSION)
 PKGS=$(shell go list ./... | grep -v /vendor/)
-DOCKER_REPO?=quay.io/brancz/kube-rbac-proxy
+DOCKER_REPO?=registry.aliyuncs.com/acs/kube-rbac-proxy
 
 check-license:
 	@echo ">> checking license headers"
@@ -25,7 +28,7 @@ build:
 	@CGO_ENABLED=0 go build --installsuffix cgo -o $(OUTPUT) $(GITHUB_URL)
 
 container:
-	docker build -t $(DOCKER_REPO):$(VERSION) .
+	docker build -t $(DOCKER_REPO):$(VERSION)-$(GIT_COMMIT)-aliyun .
 
 curl-container:
 	docker build -f ./examples/example-client/Dockerfile -t quay.io/brancz/krp-curl:v0.0.1 .
